@@ -1,20 +1,10 @@
-import { raw, Request, Response } from "express";
+import { Request, Response } from "express";
 import { pool } from "../config/db";
+import type { ParamsDictionary } from 'express-serve-static-core';
+import type { CreateProjectInput, UpdateProjectInput } from "../types";
 
 async function resolvedTagId(client: any, item: any): Promise<number | null> {
   if (!item) return null;
-  
-  // if (typeof item === 'number') {
-  //   return item;
-  // }
-
-  // if (typeof item === 'string' && !isNaN(Number(item))) {
-  //   return Number(item);
-  // }
-
-  // if (typeof item === 'object' && item !== null && item.id && !isNaN(Number(item.id))) {
-  //   return Number(item.id);
-  // }
 
   let name = '';
   let color = '#3b82f6';
@@ -36,15 +26,6 @@ async function resolvedTagId(client: any, item: any): Promise<number | null> {
       explicitId = Number(item.id);
     }
   }
-
-  // if (typeof item === 'string') {
-  //   tagName = item.trim();
-  // } else if (typeof item === 'object' && item !== null && item.name) {
-  //   tagName = String(item.name).trim();
-  //   tagColor = item.color_hex || '#3b82f6';
-  // }
-
-  // if (!tagName) return null;
   
   if (name) {
     const tagUpsertQuery = `
@@ -99,7 +80,7 @@ export const getAllProjects = async (req: Request, res: Response) => {
   }
 };
 
-export const createProject = async (req: Request, res: Response) => {
+export const createProject = async (req: Request<ParamsDictionary, unknown, CreateProjectInput>, res: Response) => {
   const client = await pool.connect();
   try {
     const { 
@@ -212,7 +193,7 @@ export const deleteProject = async (req: Request, res: Response) => {
   }
 };
 
-export const updateProject = async (req: Request, res: Response) => {
+export const updateProject = async (req: Request<{ id: string }, unknown, UpdateProjectInput>, res: Response) => {
   const client = await pool.connect();
   
   try {
