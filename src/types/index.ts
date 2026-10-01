@@ -68,3 +68,22 @@ export interface CreateEducationInput {
 }
 
 export type UpdateEducationInput = Partial<CreateEducationInput>;
+
+export interface Certificate {
+  id?: number;
+  name: string;
+  organization?: string;
+  issue_date: string;
+  certificate_url?: string | null;
+  image_url?: string | null;
+}
+
+export interface CreateCertificateInput {
+  name: string;
+  organization?: string;
+  issue_date: string;
+  certificate_url?: string | null;
+  image_url?: string | null;
+}
+
+export type UpdateCertificateInput = Partial<CreateCertificateInput>;
