@@ -5,6 +5,7 @@ import tagRoutes from './routes/tagRoutes';
 import { login } from './controllers/authController';
 import projectRoutes from './routes/projectRoutes';
 import educationRoutes from './routes/educationRoutes';
+import certificateRoutes from './routes/certificateRoutes';
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.post('/api/auth/login', login);
 app.use('/api/tags', tagRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/educations', educationRoutes);
+app.use('/api/certificates', certificateRoutes);
 
 app.get('/', (req, res) => {
   res.send('Portfolio API is running...');
