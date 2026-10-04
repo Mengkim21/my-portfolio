@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { pool } from "../config/db";
-import type { ParamsDictionary } from 'express-serve-static-core';
 import type { CreateProjectInput, UpdateProjectInput } from "../types";
 
 async function resolvedTagId(client: any, item: any): Promise<number | null> {
@@ -80,9 +79,10 @@ export const getAllProjects = async (req: Request, res: Response) => {
   }
 };
 
-export const createProject = async (req: Request<ParamsDictionary, unknown, CreateProjectInput>, res: Response) => {
+export const createProject = async (req: Request, res: Response) => {
   const client = await pool.connect();
   try {
+    const body = req.body as CreateProjectInput;
     const { 
       title,
       slug,
@@ -93,7 +93,7 @@ export const createProject = async (req: Request<ParamsDictionary, unknown, Crea
       live_url,
       is_featured,
       tags
-    } = req.body;
+    } = body;
 
     await client.query('BEGIN');
 
@@ -193,11 +193,12 @@ export const deleteProject = async (req: Request, res: Response) => {
   }
 };
 
-export const updateProject = async (req: Request<{ id: string }, unknown, UpdateProjectInput>, res: Response) => {
+export const updateProject = async (req: Request, res: Response) => {
   const client = await pool.connect();
   
   try {
     const { id } = req.params;
+    const body = req.body as UpdateProjectInput;
     const { 
       title,
       slug,
@@ -208,7 +209,7 @@ export const updateProject = async (req: Request<{ id: string }, unknown, Update
       live_url,
       is_featured,
       tags
-    } = req.body;
+    } = body;
 
     await client.query('BEGIN');
 
@@ -223,9 +224,9 @@ export const updateProject = async (req: Request<{ id: string }, unknown, Update
         slug = COALESCE($2, slug),
         summary = COALESCE($3, summary),
         description_markdown = COALESCE($4, description_markdown),
-        image_url = $5,
+        image_url = COALESCE($5, image_url),
         github_urls = COALESCE($6::jsonb, github_urls),
-        live_url = $7,
+        live_url = COALESCE($7, live_url),
         is_featured = COALESCE($8, is_featured)
       WHERE id = $9
       RETURNING *;

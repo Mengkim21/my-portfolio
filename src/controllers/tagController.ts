@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { pool } from "../config/db";
+import type { CreateTagInput, UpdateTagInput } from "../types";
 
 export const getAlltags = async (req: Request, res: Response) => {
   try {
@@ -16,7 +17,8 @@ export const getAlltags = async (req: Request, res: Response) => {
 
 export const createTag = async (req: Request, res: Response) => {
   try {
-    const { name, color_hex } = req.body;
+    const body = req.body as CreateTagInput;
+    const { name, color_hex } = body;
 
     if (!name) {
       return res.status(400).json({ error: 'Tag name is required' });
@@ -39,7 +41,7 @@ export const createTag = async (req: Request, res: Response) => {
 export const updateTag = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, color_hex } = req.body;
+    const body = req.body as UpdateTagInput;
 
     const result = await pool.query(
       `
@@ -47,10 +49,8 @@ export const updateTag = async (req: Request, res: Response) => {
       SET
         name = COALESCE($1, name),
         color_hex = COALESCE($2, color_hex)
-      WHERE id = $3
-      RETURNING *;
-      `,
-      [name || null, color_hex || null, id]
+      WHERE id = $3 RETURNING *;`,
+      [body.name || null, body.color_hex || null, id]
     );
 
     if (result.rowCount === 0) {
