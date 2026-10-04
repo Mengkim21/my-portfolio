@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { pool } from "../config/db";
-import type { ParamsDictionary } from 'express-serve-static-core';
 import type { CreateEducationInput, UpdateEducationInput } from "../types";
 
 export const getAllEducations = async (req: Request, res: Response) => {
@@ -16,8 +15,9 @@ export const getAllEducations = async (req: Request, res: Response) => {
   }
 };
 
-export const createEducation = async (req: Request<ParamsDictionary, unknown, CreateEducationInput>, res: Response) => {
+export const createEducation = async (req: Request, res: Response) => {
   try {
+    const body = req.body as CreateEducationInput;
     const {
       institution,
       degree,
@@ -27,7 +27,7 @@ export const createEducation = async (req: Request<ParamsDictionary, unknown, Cr
       location,
       grade,
       description
-    } = req.body;
+    } = body;
 
     const result = await pool.query(
       `INSERT INTO educations (institution, degree, field_of_study, start_date, end_date, location, grade, description)
@@ -44,19 +44,10 @@ export const createEducation = async (req: Request<ParamsDictionary, unknown, Cr
   }
 };
 
-export const updateEducation = async (req: Request<{ id: string }, unknown, UpdateEducationInput>, res: Response) => {
+export const updateEducation = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const {
-      institution,
-      degree,
-      field_of_study,
-      start_date,
-      end_date,
-      location,
-      grade,
-      description
-    } = req.body;
+    const body = req.body as UpdateEducationInput;
 
     const result = await pool.query(
       `UPDATE educations
@@ -70,12 +61,15 @@ export const updateEducation = async (req: Request<{ id: string }, unknown, Upda
         grade = COALESCE($7, grade),
         description = COALESCE($8, description)
       WHERE id = $9 RETURNING *;`,
-      [institution || null, degree || null, field_of_study || null, 
-        start_date || null, end_date || null, location || null, 
-        grade || null, description || null, id]
+      [body.institution || null, body.degree || null, body.field_of_study || null, 
+        body.start_date || null, body.end_date || null, body.location || null, 
+        body.grade || null, body.description || null, id]
     );
 
-    if (result.rowCount === 0) return res.status(404).json({ error: 'Education not found' });
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Education not found' });
+    }
+
     res.status(201).json({
       message: 'Education updated',
       data: result.rows[0]
@@ -85,12 +79,14 @@ export const updateEducation = async (req: Request<{ id: string }, unknown, Upda
   }
 };
 
-export const deleteEducation = async (req: Request<{ id: string }>, res: Response) => {
+export const deleteEducation = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     
     const result = await pool.query('DELETE FROM educations WHERE id = $1 RETURNING id', [id]);
-    if (result.rowCount === 0) return res.status(404).json({ error: 'Education not found' });
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Education not found' });
+    }
 
     res.status(201).json({ message: 'Education deleted' });
   } catch (error: any) {

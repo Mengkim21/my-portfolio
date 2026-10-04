@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { pool } from "../config/db";
-import type { ParamsDictionary } from 'express-serve-static-core';
 import type { CreateCertificateInput, UpdateCertificateInput } from "../types";
 
 export const getAllCertificates = async (req: Request, res: Response) => {
@@ -16,15 +15,16 @@ export const getAllCertificates = async (req: Request, res: Response) => {
   }
 };
 
-export const createCertificate = async (req: Request<ParamsDictionary, unknown, CreateCertificateInput>, res: Response) => {
+export const createCertificate = async (req: Request, res: Response) => {
   try {
+    const body = req.body as CreateCertificateInput;
     const {
       name,
       organization,
       issue_date,
       certificate_url,
       image_url
-    } = req.body;
+    } = body;
 
     const result = await pool.query(
       `INSERT INTO certificates (name, organization, issue_date, certificate_url, image_url)
@@ -41,16 +41,10 @@ export const createCertificate = async (req: Request<ParamsDictionary, unknown, 
   }
 };
 
-export const updateCertificate = async (req: Request<{ id: string }, unknown, UpdateCertificateInput>, res: Response) => {
+export const updateCertificate = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const {
-      name,
-      organization,
-      issue_date,
-      certificate_url,
-      image_url
-    } = req.body;
+    const body = req.body as UpdateCertificateInput;
 
     const result = await pool.query(
       `UPDATE certificates
@@ -61,8 +55,17 @@ export const updateCertificate = async (req: Request<{ id: string }, unknown, Up
         certificate_url = COALESCE($4, certificate_url),
         image_url = COALESCE($5, image_url)
       WHERE id = $6 RETURNING *;`,
-      [name || null, organization || null, issue_date || null, certificate_url || null, image_url || null, id]
-    )
+      [body.name || null, body.organization || null, body.issue_date || null, body.certificate_url || null, body.image_url || null, id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Certificate not found' });
+    }
+
+    res.status(200).json({
+      message: 'Certificate updated',
+      data: result.rows[0]
+    });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
