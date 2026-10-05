@@ -7,6 +7,7 @@ import projectRoutes from './routes/projectRoutes';
 import educationRoutes from './routes/educationRoutes';
 import certificateRoutes from './routes/certificateRoutes';
 import experienceRoutes from './routes/experienceRoutes';
+import skillRoutes from './routes/skillRoutes';
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/educations', educationRoutes);
 app.use('/api/certificates', certificateRoutes);
 app.use('/api/experiences', experienceRoutes);
+app.use('/api/skills', skillRoutes);
 
 app.get('/', (req, res) => {
   res.send('Portfolio API is running...');

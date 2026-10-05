@@ -61,3 +61,11 @@ export interface CreateExperienceInput {
 }
 
 export type UpdateExperienceInput = Partial<CreateExperienceInput>;
+
+export interface CreateSkillInput {
+  name: string;
+  category: string;
+  proficiency_level?: string;
+}
+
+export type UpdateSkillInput = Partial<CreateSkillInput>;
